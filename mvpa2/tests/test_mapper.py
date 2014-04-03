@@ -28,6 +28,7 @@ from mvpa2.mappers.flatten import ProductFlattenMapper
 
 import itertools
 import operator
+import pickle
 
 from mvpa2.base import externals
 
@@ -61,6 +62,7 @@ def test_flatten():
     # actually, there should be no difference between a plain FlattenMapper and
     # a chain that only has a FlattenMapper as the one element
     for fm in [FlattenMapper(space='voxel'),
+               pickle.loads(pickle.dumps(FlattenMapper(space='voxel'))),
                ChainMapper([FlattenMapper(space='voxel'),
                             StaticFeatureSelection(slice(None))])]:
         # not working if untrained

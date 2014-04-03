@@ -17,6 +17,8 @@ from mvpa2.mappers.base import Mapper, accepts_dataset_as_samples, \
         ChainMapper
 from mvpa2.featsel.base import StaticFeatureSelection
 from mvpa2.misc.support import is_in_volume
+from mvpa2.base.param import Parameter
+from mvpa2.base.constraints import EnsureTupleOf, EnsureNone, EnsureInt
 
 if __debug__:
     from mvpa2.base import debug
@@ -36,6 +38,11 @@ class FlattenMapper(Mapper):
     At present this mapper is only designed (and tested) to work with C-ordered
     arrays.
     """
+    
+    origshape = Parameter( [], constraints=EnsureTupleOf(int)) 
+    maxdims = Parameter(None, constraints=EnsureNone() | EnsureInt())
+    
+    
     def __init__(self, shape=None, maxdims=None, **kwargs):
         """
         Parameters
@@ -50,18 +57,23 @@ class FlattenMapper(Mapper):
         # by default auto train
         kwargs['auto_train'] = kwargs.get('auto_train', True)
         Mapper.__init__(self, **kwargs)
-        self.__origshape = None         # pylint pacifier
-        self.__maxdims = maxdims
+
+        self.params.maxdims = maxdims
         if not shape is None:
             self._train_with_shape(shape)
 
     def __repr__(self, prefixes=[]):
         return super(FlattenMapper, self).__repr__(
-            prefixes=prefixes
-            + _repr_attrs(self, ['shape', 'maxdims']))
+            prefixes=prefixes)
 
     def __str__(self):
         return _str(self)
+        
+    def __reduce__(self):
+        return (self.__class__,
+                    (self.params.origshape, 
+                     self.params.maxdims),
+                    {})        
 
 
     @accepts_dataset_as_samples
@@ -83,7 +95,7 @@ class FlattenMapper(Mapper):
         """
         # infer the sample shape from the data under the assumption that the
         # first axis is the samples-separating dimension
-        self.__origshape = shape
+        self.params.origshape = shape
         # flag the mapper as trained
         self._set_trained()
 
@@ -93,7 +105,7 @@ class FlattenMapper(Mapper):
         # local binding
         nsamples = data.shape[0]
         sshape = data.shape[1:]
-        oshape = self.__origshape
+        oshape = self.params.origshape
 
         if oshape is None:
             raise RuntimeError("FlattenMapper needs to be trained before it "
@@ -108,8 +120,8 @@ class FlattenMapper(Mapper):
         #    return data.reshape(nsamples, -1)
         ## the first part of the shape matches (e.g. some additional axes present)
         #elif sshape[:len(oshape)] == oshape:
-        if not self.__maxdims is None:
-            maxdim = min(len(oshape), self.__maxdims)
+        if not self.params.maxdims is None:
+            maxdim = min(len(oshape), self.params.maxdims)
         else:
             maxdim = len(oshape)
         # flatten the pieces the mapper knows about and preserve the rest
@@ -132,10 +144,10 @@ class FlattenMapper(Mapper):
                 debug('MAP_', "Forward-mapping fa '%s'." % k)
             attr = dataset.fa[k].value
             # the maximmum number of axis to flatten in the attr
-            if not self.__maxdims is None:
-                maxdim = min(len(self.__origshape), self.__maxdims)
+            if not self.params.maxdims is None:
+                maxdim = min(len(self.params.origshape), self.params.maxdims)
             else:
-                maxdim = len(self.__origshape)
+                maxdim = len(self.params.origshape)
             multiplier = mds.nfeatures \
                     / np.prod(attr.shape[:maxdim])
             if __debug__:
@@ -161,7 +173,7 @@ class FlattenMapper(Mapper):
         # local binding
         nsamples = data.shape[0]
         sshape = data.shape[1:]
-        oshape = self.__origshape
+        oshape = self.params.origshape
         return data.reshape((nsamples,) + oshape + sshape[1:])
 
 
@@ -184,8 +196,6 @@ class FlattenMapper(Mapper):
             del mds.fa[inspace]
         return mds
 
-    shape = property(fget=lambda self:self.__origshape)
-    maxdims = property(fget=lambda self:self.__maxdims)
 
 class ProductFlattenMapper(FlattenMapper):
     """Reshaping mapper that flattens multidimensional arrays and
