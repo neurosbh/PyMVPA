@@ -18,6 +18,7 @@ from mvpa2.base.state import ConditionalAttribute
 from mvpa2.base.types import is_datasetlike
 from mvpa2.base.dochelpers import _repr_attrs
 from mvpa2.base.node import CompoundNode, CombinedNode, ChainNode
+from mvpa2.base.param import Parameter
 
 if __debug__:
     from mvpa2.base import debug
@@ -72,6 +73,14 @@ class Learner(Node):
     trained_dataset = ConditionalAttribute(enabled=False,
         doc="The dataset it has been trained on")
 
+    auto_train = Parameter(False, constraints='bool',
+                                  doc="Whether the Learner performs automatic" 
+                                       " training when called untrained.")
+
+    force_train = Parameter(False, constraints='bool',
+                                   doc="Whether the Learner enforces training" 
+                                       " upon every call.")
+
 
     def __init__(self, auto_train=False, force_train=False, **kwargs):
         """
@@ -88,8 +97,9 @@ class Learner(Node):
         """
         Node.__init__(self, **kwargs)
         self.__is_trained = False
-        self.__auto_train = auto_train
-        self.__force_train = force_train
+        self.params.auto_train = auto_train
+        self.params.force_train = force_train
+
 
 
     def __repr__(self, prefixes=[]):
@@ -234,7 +244,7 @@ class Learner(Node):
         # trained before use and auto-train
         if self.is_trained:
             # already trained
-            if self.force_train:
+            if self.params.force_train:
                 if __debug__:
                     debug('LRN', "Forcing training of %s on %s",
                           (self, ds))
@@ -245,7 +255,7 @@ class Learner(Node):
                       (self, ds))
         else:
             # not trained
-            if self.auto_train:
+            if self.params.auto_train:
                 # auto training requested
                 if __debug__:
                     debug('LRN', "Auto-training %s on %s",
@@ -261,12 +271,7 @@ class Learner(Node):
 
     is_trained = property(fget=lambda x:x.__is_trained, fset=_set_trained,
                           doc="Whether the Learner is currently trained.")
-    auto_train = property(fget=lambda x:x.__auto_train,
-                          doc="Whether the Learner performs automatic training"
-                              "when called untrained.")
-    force_train = property(fget=lambda x:x.__force_train,
-                          doc="Whether the Learner enforces training upon every"
-                              "called.")
+
 
 
 class CompoundLearner(Learner, CompoundNode):

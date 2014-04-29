@@ -19,14 +19,11 @@ from mvpa2.featsel.base import StaticFeatureSelection
 from mvpa2.misc.support import is_in_volume
 from mvpa2.base.param import Parameter
 from mvpa2.base.constraints import EnsureTupleOf, EnsureNone, EnsureInt
+from mvpa2.base.node import Node
 
 if __debug__:
     from mvpa2.base import debug
-    
-    
-def _new_FlattenMapper(cls, value, kw):
-    "A function to map kwargs into cls.__new__"
-    return cls.__new__(cls, value, **kw)    
+        
 
 class FlattenMapper(Mapper):
     """Reshaping mapper that flattens multidimensional arrays into 1D vectors.
@@ -60,7 +57,7 @@ class FlattenMapper(Mapper):
           If None, all axes will be flattened.
         """
         # by default auto train
-        kwargs['auto_train'] = kwargs.get('auto_train', True)
+        self.params.auto_train = True
         Mapper.__init__(self, **kwargs)
         
         self._kwargs = kwargs    
@@ -75,21 +72,7 @@ class FlattenMapper(Mapper):
 
     def __str__(self):
         return _str(self)
-        
-#    def __reduce__(self):
-#        d={'space':'voxel'}
-#        return (self.__class__,
-#                    (self.params.origshape, 
-#                     self.params.maxdims,
-#                     d),
-#                    {})        
-
-    def __reduce__(self):
-        return (self.__class__,
-                    _new_FlattenMapper((self.__class__, , 
-                                        self._kwargskwargs)),
-                    {})  
-
+                
 
     @accepts_dataset_as_samples
     def _train(self, samples):
@@ -238,8 +221,9 @@ class ProductFlattenMapper(FlattenMapper):
             in the factor names.
         reverse_set_fa: bool
         '''
-        kwargs['auto_train'] = kwargs.get('auto_train', True)
-
+        #kwargs['auto_train'] = kwargs.get('auto_train', True)
+	self.params.auto_train = True
+        
         # make sure the factor names and values are properly set
         factor_names = list(factor_names)
         space = '_'.join(factor_names) + '_indices'
