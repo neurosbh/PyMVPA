@@ -99,15 +99,18 @@ class Node(ClassWithCollections):
             pass_attr = (pass_attr,)
         self.__pass_attr = pass_attr
 
-    def __reduce__(self):
-        cwc = ClassWithCollections.__reduce__(self)
-        if hasattr(self, 'params'):
-            default_keys = [key for key in self.params 
-                                    if key not in self.params.which_set()]
-            for key in default_keys:
-                del cwc[2]['params'][key]
-        return cwc
 
+    def __reduce__(self):
+        state = dict()
+        for key in self.params.which_set():        
+            state[key]=self.params[key].value
+        return (self.__class__,(None,), state)
+
+
+    def __setstate__(self, state):
+        for k, v in state.iteritems():
+            self.params[k].value = v
+   
 
     def __call__(self, ds):
         """
