@@ -57,9 +57,9 @@ class FlattenMapper(Mapper):
           If None, all axes will be flattened.
         """
         # by default auto train
-        self.params.auto_train = True
-        Mapper.__init__(self, **kwargs)
         
+        Mapper.__init__(self, **kwargs)
+        self.params.auto_train = True
         self._kwargs = kwargs    
 
         self.params.maxdims = maxdims

@@ -103,9 +103,8 @@ class Learner(Node):
 
 
     def __repr__(self, prefixes=[]):
-        return super(Learner, self).__repr__(
-            prefixes=prefixes
-            + _repr_attrs(self, ['auto_train', 'force_train'], default=False))
+        return super(Learner, self).__repr__(prefixes=prefixes)
+            
 
     def train(self, ds):
         """
