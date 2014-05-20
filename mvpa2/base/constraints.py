@@ -90,6 +90,28 @@ class EnsureFloat(EnsureDType):
         """Initializes EnsureDType with float"""
         EnsureDType.__init__(self, float)
 
+class EnsureArrayOf(Constraint):
+    """Ensure that an input is a numpy array of a particular data type
+    """    
+    def __init__(self, dtype):
+        """
+        Parameters
+        ----------
+        dtype : string representing the array type
+        """
+        self._dtype = dtype
+        super(EnsureArrayOf, self).__init__()
+        
+    def __call__(self, value):
+        return np.asanyarray(value, dtype=self._dtype)
+
+    def short_description(self):
+        return 'list(%s)' % self._dtype
+
+    def long_description(self):
+        return "value must be convertible to %s" % self.short_description()                
+        
+
 class EnsureListOf(Constraint):
     """Ensure that an input is a list of a particular data type
     """
@@ -114,7 +136,6 @@ class EnsureListOf(Constraint):
     def long_description(self):
         return "value must be convertible to %s" % self.short_description()
 
-        
 class EnsureTupleOf(Constraint):
     """Ensure that an input is a tuple of a particular data type
     """
@@ -138,8 +159,7 @@ class EnsureTupleOf(Constraint):
 
     def long_description(self):
         return "value must be convertible to %s" % self.short_description()        
-        
-    
+            
 class EnsureBool(Constraint):
     """Ensure that an input is a bool.
 
