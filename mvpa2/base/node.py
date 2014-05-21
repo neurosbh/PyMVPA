@@ -301,7 +301,7 @@ class Node(ClassWithCollections):
     def __repr__(self, prefixes=[]):
         return super(Node, self).__repr__(
             prefixes=prefixes
-            + _repr_attrs(self, ['space', 'pass_attr', 'postproc']))
+            + _repr_attrs(self, ['pass_attr', 'postproc']))
 
 
     pass_attr = property(lambda self: self.__pass_attr,
