@@ -145,15 +145,15 @@ def test_product_flatten():
     flattener = ProductFlattenMapper(names)
 
     # test I/O (only if h5py is available)
-    if externals.exists('h5py'):
-        from mvpa2.base.hdf5 import h5save, h5load
-        import tempfile
-        import os
-
-        fd, testfn = tempfile.mkstemp('mapper.h5py', 'test_product'); os.close(fd)
-        h5save(testfn, flattener)
-        flattener = h5load(testfn)
-        os.unlink(testfn)
+#    if externals.exists('h5py'):
+#        from mvpa2.base.hdf5 import h5save, h5load
+#        import tempfile
+#        import os
+#
+#        fd, testfn = tempfile.mkstemp('mapper.h5py', 'test_product'); os.close(fd)
+#        h5save(testfn, flattener)
+#        flattener = h5load(testfn)
+#        os.unlink(testfn)
 
     mds = flattener(ds)
 

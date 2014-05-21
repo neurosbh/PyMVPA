@@ -18,6 +18,8 @@ from mvpa2.base.state import ClassWithCollections, ConditionalAttribute
 
 from mvpa2.base.collections import SampleAttributesCollection, \
      FeatureAttributesCollection, DatasetAttributesCollection
+from mvpa2.base.param import Parameter
+from mvpa2.base.constraints import EnsureNone, EnsureStr
 
 if __debug__:
     from mvpa2.base import debug
@@ -35,6 +37,8 @@ class Node(ClassWithCollections):
     compute and store information about the input data that is "interesting" in
     the context of the corresponding processing in the output dataset.
     """
+
+    space = Parameter(None, constraints=EnsureNone() | EnsureStr())
 
     calling_time = ConditionalAttribute(enabled=True,
         doc="Time (in seconds) it took to call the node")
@@ -93,7 +97,8 @@ class Node(ClassWithCollections):
             debug("NO",
                   "Init node '%s' (space: '%s', postproc: '%s')",
                   (self.__class__.__name__, space, str(postproc)))
-        self.set_space(space)
+        self.params.space = space          
+        #self.set_space(space)
         self.set_postproc(postproc)
         if isinstance(pass_attr, basestring):
             pass_attr = (pass_attr,)
@@ -272,16 +277,6 @@ class Node(ClassWithCollections):
         yield self(ds)
 
 
-    def get_space(self):
-        """Query the processing space name of this node."""
-        return self.__space
-
-
-    def set_space(self, name):
-        """Set the processing space name of this node."""
-        self.__space = name
-
-
     def get_postproc(self):
         """Returns the post-processing node or None."""
         return self.__postproc
@@ -294,6 +289,10 @@ class Node(ClassWithCollections):
         """
         self.__postproc = node
 
+    def get_space(self):
+        """For backwards compapility."""
+        return self.params.space
+
 
     def __str__(self):
         return _str(self)
@@ -304,8 +303,6 @@ class Node(ClassWithCollections):
             prefixes=prefixes
             + _repr_attrs(self, ['space', 'pass_attr', 'postproc']))
 
-    space = property(get_space, set_space,
-                     doc="Processing space name of this node")
 
     pass_attr = property(lambda self: self.__pass_attr,
                          doc="Which attributes of the dataset or self.ca "

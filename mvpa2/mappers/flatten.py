@@ -19,7 +19,6 @@ from mvpa2.featsel.base import StaticFeatureSelection
 from mvpa2.misc.support import is_in_volume
 from mvpa2.base.param import Parameter
 from mvpa2.base.constraints import EnsureTupleOf, EnsureNone, EnsureInt
-from mvpa2.base.node import Node
 
 if __debug__:
     from mvpa2.base import debug
@@ -105,7 +104,7 @@ class FlattenMapper(Mapper):
         sshape = data.shape[1:]
         oshape = self.params.origshape
 
-        if oshape is None:
+        if not oshape:
             raise RuntimeError("FlattenMapper needs to be trained before it "
                                "can be used.")
         # at least the first feature axis has to match match
@@ -157,11 +156,11 @@ class FlattenMapper(Mapper):
             mds.fa[k] = bced.reshape((-1,) + bced.shape[maxdim:])
 
         # if there is no inspace return immediately
-        if self.get_space() is None:
+        if self.params.space is None:
             return mds
         # otherwise create the coordinates as feature attributes
         else:
-            mds.fa[self.get_space()] = \
+            mds.fa[self.params.space] = \
                 list(np.ndindex(dataset.samples[0].shape))
             return mds
 
@@ -222,7 +221,7 @@ class ProductFlattenMapper(FlattenMapper):
         reverse_set_fa: bool
         '''
         #kwargs['auto_train'] = kwargs.get('auto_train', True)
-	self.params.auto_train = True
+        self.params.auto_train = True
         
         # make sure the factor names and values are properly set
         factor_names = list(factor_names)
@@ -269,7 +268,7 @@ class ProductFlattenMapper(FlattenMapper):
 
         mds = super(ProductFlattenMapper, self)._forward_dataset(dataset)
 
-        oshape = self.shape
+        oshape = self.params.origshape
 
         factor_names_values = zip(*(self._factor_names, self._factor_values))
         # now map all the factor names and values to feature attributes

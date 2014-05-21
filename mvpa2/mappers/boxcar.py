@@ -16,7 +16,7 @@ from mvpa2.mappers.base import Mapper
 from mvpa2.clfs.base import accepts_dataset_as_samples
 from mvpa2.base.dochelpers import _str
 from mvpa2.base.param import Parameter
-from mvpa2.base.constraints import EnsureInt, EnsureRange, EnsureTupleOf
+from mvpa2.base.constraints import EnsureInt, EnsureRange, EnsureArrayOf
 
 if __debug__:
     from mvpa2.base import debug
@@ -38,7 +38,7 @@ class BoxcarMapper(Mapper):
     #       arbitrary sample attributes into the samples matrix (with
     #       appropriate mapper adjustment, e.g. CombinedMapper).
     
-    startpoints = Parameter((), constraints=EnsureTupleOf(int))
+    startpoints = Parameter(np.array((),dtype='int64'), constraints=EnsureArrayOf('int64'))
     boxlength = Parameter(1, constraints=(EnsureInt() & EnsureRange(min=1))) 
     offset = Parameter(0, constraints='int')
     
@@ -156,10 +156,10 @@ class BoxcarMapper(Mapper):
             # this implementation can actually deal with 1D-arrays
             mds.sa[k] = self._forward_data(dataset.sa[k].value)
         # create the box offset attribute if space name is given
-        if self.get_space():
-            mds.fa[self.get_space() + '_offsetidx'] = np.arange(self.params.boxlength,
+        if self.params.space is not None:
+            mds.fa[self.params.space + '_offsetidx'] = np.arange(self.params.boxlength,
                                                                 dtype='int')
-            mds.sa[self.get_space() + '_onsetidx'] = self.params.startpoints.copy()
+            mds.sa[self.params.space + '_onsetidx'] = self.params.startpoints.copy()
         return mds
 
 
@@ -204,7 +204,7 @@ class BoxcarMapper(Mapper):
         mds.fa.set_length_check(mds.nfeatures)
         # map old feature attributes -- which simply is taken the first one
         # and kill the inspace attribute, since it 
-        inspace = self.get_space()
+        inspace = self.params.space
         for k in dataset.fa:
             if inspace is None or k != (inspace + '_offsetidx'):
                 mds.fa[k] = dataset.fa[k].value[0]
