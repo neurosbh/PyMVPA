@@ -89,7 +89,7 @@ class ZScoreMapper(Mapper):
     def __repr__(self, prefixes=[]):
         return super(ZScoreMapper, self).__repr__(
             prefixes=prefixes
-            + _repr_attrs(self, ['params', 'param_est', 'chunks_attr'])
+            + _repr_attrs(self, ['zsm_params', 'param_est', 'chunks_attr'])
             + _repr_attrs(self, ['dtype'], default='float64'))
 
 
@@ -256,7 +256,7 @@ class ZScoreMapper(Mapper):
                 samples[:, std_nz] /= np.asanyarray(std)[std_nz]
         return samples
 
-    params = property(fget=lambda self:self.__params)
+    zsm_params = property(fget=lambda self:self.__params)
     param_est = property(fget=lambda self:self.__param_est)
     chunks_attr = property(fget=lambda self:self.__chunks_attr)
     dtype = property(fget=lambda self:self.__dtype)

@@ -9,6 +9,7 @@
 
 __docformat__ = 'restructuredtext'
 
+import inspect
 import time
 import numpy as np
 from mvpa2.support import copy
@@ -105,16 +106,52 @@ class Node(ClassWithCollections):
         self.__pass_attr = pass_attr
 
 
+#    def __getstate__(self):
+#        state = dict()
+#        for key in self.params.which_set():        
+#            state[key]=self.params[key].value
+        ### uggly, temporally....    
+#        if hasattr(self, '_slicearg'):
+#            state['_slicearg'] = self._slicearg  
+#        return (self.params, state)        
+
+
     def __reduce__(self):
+
+        def para_tuple(mvpa2_object):
+            argspec = inspect.getargspec(mvpa2_object.__init__)
+            l = []
+            for i in argspec[0][1:]:
+                if i in mvpa2_object.params:
+                    l.append(mvpa2_object.params[i].value)
+                else:
+                    l.append(None)
+            return tuple(l)          
+                
         state = dict()
         for key in self.params.which_set():        
             state[key]=self.params[key].value
-        return (self.__class__,(None,), state)
+        ### uggly, temporally....    
+        if hasattr(self, '_slicearg'):
+            state['_slicearg'] = self._slicearg
+            
+        return (self.__class__, para_tuple(self), state)
 
 
-    def __setstate__(self, state):
-        for k, v in state.iteritems():
-            self.params[k].value = v
+#    def __setstate__(self, stuff):
+#        print 'FUCK1'
+#        n = Node()
+#        self = n
+#        print 'FUCK2'
+#        self.params = stuff[0]
+#        #print self.__dict__
+#        print 'FUCK3'
+#        for k, v in stuff[1].iteritems():
+#            self.__dict__[k] = v
+#            if k=='_slicearg':
+#                self._slicearg=v
+#            else:    
+#                self.params[k].value = v
    
 
     def __call__(self, ds):
