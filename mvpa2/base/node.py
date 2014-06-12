@@ -105,15 +105,9 @@ class Node(ClassWithCollections):
             pass_attr = (pass_attr,)
         self.__pass_attr = pass_attr
 
-
-#    def __getstate__(self):
-#        state = dict()
-#        for key in self.params.which_set():        
-#            state[key]=self.params[key].value
-        ### uggly, temporally....    
-#        if hasattr(self, '_slicearg'):
-#            state['_slicearg'] = self._slicearg  
-#        return (self.params, state)        
+    def __setstate__(self, d):
+        for key in d.keys():
+            self.params[key].value = d[key] 
 
 
     def __reduce__(self):
@@ -124,6 +118,8 @@ class Node(ClassWithCollections):
             for i in argspec[0][1:]:
                 if i in mvpa2_object.params:
                     l.append(mvpa2_object.params[i].value)
+                elif i=='shape':
+                    l.append(mvpa2_object.params['origshape'].value)
                 else:
                     l.append(None)
             return tuple(l)          
@@ -131,28 +127,14 @@ class Node(ClassWithCollections):
         state = dict()
         for key in self.params.which_set():        
             state[key]=self.params[key].value
-        ### uggly, temporally....    
+    
+        ### uggly, temporally....
+        fix_dict = {}
         if hasattr(self, '_slicearg'):
-            state['_slicearg'] = self._slicearg
+            fix_dict.update({'_slicearg':self._slicearg})
             
-        return (self.__class__, para_tuple(self), state)
+        return (self.__class__, para_tuple(self), state, None, fix_dict)
 
-
-#    def __setstate__(self, stuff):
-#        print 'FUCK1'
-#        n = Node()
-#        self = n
-#        print 'FUCK2'
-#        self.params = stuff[0]
-#        #print self.__dict__
-#        print 'FUCK3'
-#        for k, v in stuff[1].iteritems():
-#            self.__dict__[k] = v
-#            if k=='_slicearg':
-#                self._slicearg=v
-#            else:    
-#                self.params[k].value = v
-   
 
     def __call__(self, ds):
         """

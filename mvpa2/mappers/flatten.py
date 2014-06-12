@@ -67,6 +67,7 @@ class FlattenMapper(Mapper):
             self._train_with_shape(shape)
 
     def __repr__(self, prefixes=[]):
+        print "FUCK IT"
         return super(FlattenMapper, self).__repr__(
             prefixes=prefixes)
 
