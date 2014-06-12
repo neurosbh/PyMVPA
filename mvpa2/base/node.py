@@ -105,10 +105,10 @@ class Node(ClassWithCollections):
             pass_attr = (pass_attr,)
         self.__pass_attr = pass_attr
 
-    def __setstate__(self, d):
-        for key in d.keys():
-            self.params[key].value = d[key] 
-
+    def __setstate__(self, state):
+        for key in state[0].keys():
+            self.params[key].value = state[0][key] 
+        self.__dict__.update(state[1])    
 
     def __reduce__(self):
 
@@ -124,16 +124,17 @@ class Node(ClassWithCollections):
                     l.append(None)
             return tuple(l)          
                 
-        state = dict()
+        para_dict = dict()
         for key in self.params.which_set():        
-            state[key]=self.params[key].value
+            para_dict[key]=self.params[key].value
     
         ### uggly, temporally....
         fix_dict = {}
         if hasattr(self, '_slicearg'):
             fix_dict.update({'_slicearg':self._slicearg})
+                
             
-        return (self.__class__, para_tuple(self), state, None, fix_dict)
+        return (self.__class__, para_tuple(self), (para_dict, fix_dict))
 
 
     def __call__(self, ds):
