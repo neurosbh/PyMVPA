@@ -401,7 +401,7 @@ def test_save_load_FlattenMapper(f):
     ds_ = fm(ds)
     ds_r = fm.reverse(ds_)
     fm_ = saveload(fm, f)
-    assert_equal(fm_.shape, fm.shape)
+    assert_equal(fm_.params.shape, fm.params.shape)
 
 @with_tempfile()
 def test_versions(f):

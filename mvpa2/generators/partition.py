@@ -576,5 +576,7 @@ class ExcludeTargetsCombinationsPartitioner(Node):
                                         combination_matches)] \
                         = self.partition_assign
             pds = ds.copy(deep=False)
-            pds.sa[self.space] = partitioning
+            #
+            pds.sa[self.params.space] = partitioning
+            #pds.sa[self.space] = partitioning
             yield pds

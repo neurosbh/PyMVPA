@@ -440,7 +440,7 @@ class SplitRFE(RFE):
     def _train(self, dataset):
         pmeasure = ProxyMeasure(self.lrn,
                                 postproc=BinaryFxNode(self.errorfx,
-                                                      self.lrn.space),
+                                                      self.lrn.params.space),
                                 skip_train=True   # do not train since fmeasure will
                                 )
 

@@ -107,6 +107,7 @@ class Node(ClassWithCollections):
 
     def __setstate__(self, state):
         for key in state[0].keys():
+            #print key
             self.params[key].value = state[0][key] 
         self.__dict__.update(state[1])    
 
@@ -115,12 +116,13 @@ class Node(ClassWithCollections):
         def para_tuple(mvpa2_object):
             argspec = inspect.getargspec(mvpa2_object.__init__)
             l = []
-            for i in argspec[0][1:]:
+            for k,i in enumerate(argspec[0][1:]):
                 if i in mvpa2_object.params:
                     l.append(mvpa2_object.params[i].value)
                 elif i=='shape':
                     l.append(mvpa2_object.params['origshape'].value)
                 else:
+                    #l.append(argspec[-1][k])
                     l.append(None)
             return tuple(l)          
                 
@@ -132,6 +134,9 @@ class Node(ClassWithCollections):
         fix_dict = {}
         if hasattr(self, '_slicearg'):
             fix_dict.update({'_slicearg':self._slicearg})
+
+          
+            
                 
             
         return (self.__class__, para_tuple(self), (para_dict, fix_dict))

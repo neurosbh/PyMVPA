@@ -15,8 +15,6 @@ import numpy as np
 from mvpa2.mappers.base import Mapper
 from mvpa2.clfs.base import accepts_dataset_as_samples
 from mvpa2.base.dochelpers import _str
-from mvpa2.base.param import Parameter
-from mvpa2.base.constraints import EnsureInt, EnsureRange, EnsureArrayOf
 
 if __debug__:
     from mvpa2.base import debug
@@ -37,12 +35,6 @@ class BoxcarMapper(Mapper):
     #       utility functionality (outside BoxcarMapper) could be used to merge
     #       arbitrary sample attributes into the samples matrix (with
     #       appropriate mapper adjustment, e.g. CombinedMapper).
-    
-    startpoints = Parameter(np.array((),dtype='int64'), constraints=EnsureArrayOf('int64'))
-    boxlength = Parameter(1, constraints=(EnsureInt() & EnsureRange(min=1))) 
-    offset = Parameter(0, constraints='int')
-    
-    
     def __init__(self, startpoints, boxlength, offset=0, **kwargs):
         """
         Parameters
@@ -59,9 +51,23 @@ class BoxcarMapper(Mapper):
         Mapper.__init__(self, **kwargs)
         self._outshape = None
 
-        self.params.startpoints = np.asanyarray(startpoints)
-        self.params.boxlength = boxlength
-        self.params.offset = offset
+        startpoints = np.asanyarray(startpoints)
+        if np.issubdtype(startpoints.dtype, 'i'):
+            self.startpoints = startpoints
+        else:
+            if __debug__:
+                debug('MAP', "Boxcar: obtained startpoints are not of int type."
+                      " Rounding and changing dtype")
+            self.startpoints = np.asanyarray(np.round(startpoints), dtype='i')
+
+        # Sanity checks
+        if boxlength < 1:
+            raise ValueError, "Boxlength lower than 1 makes no sense."
+        if boxlength - int(boxlength) != 0:
+            raise ValueError, "boxlength must be an integer value."
+
+        self.boxlength = int(boxlength)
+        self.offset = offset
         self.__selectors = None
 
         # build a list of list where each sublist contains the indexes of to be
@@ -70,12 +76,25 @@ class BoxcarMapper(Mapper):
                              for i in startpoints ]
 
 
+    def __reduce__(self):
+        # python < 2.6 cannot copy slices, we will use the constructor the get
+        # them back and additionally reapply the stae of the object (except for
+        # the bad bad slices)
+        state = self.__dict__.copy()
+        badguy = '_%s__selectors' % self.__class__.__name__
+        if badguy in state:
+            del state[badguy]
+        return (self.__class__,
+                    (self.startpoints, self.boxlength, self.offset),
+                    state)
+
+
     @accepts_dataset_as_samples
     def _train(self, data):
-        startpoints = self.params.startpoints
-        boxlength = self.params.boxlength
+        startpoints = self.startpoints
+        boxlength = self.boxlength
         if __debug__:
-            offset = self.params.offset
+            offset = self.offset
             for sp in startpoints:
                 if ( sp + offset + boxlength - 1 > len(data)-1 ) \
                    or ( sp + offset < 0 ):
@@ -86,21 +105,14 @@ class BoxcarMapper(Mapper):
 
 
     def __repr__(self):
-        s = super(BoxcarMapper, self).__repr__()       
-        # return s.replace("(", "(boxlength=%d, offset=%d, startpoints=%s, " %
-        #                        (self.params.boxlength, 
-        #                         self.params.offset, 
-        #                         str(self.startpoints)),
-        #                         1)
-        # The above gives 'boxlength=xxx' twice
-        # First attempt to fix this is below
-        return s.replace(")", ", offset=%d, startpoints=%s)" %
-                               (self.params.offset, 
-                                str(self.params.startpoints),1))
+        s = super(BoxcarMapper, self).__repr__()
+        return s.replace("(", "(boxlength=%d, offset=%d, startpoints=%s, " %
+                         (self.boxlength, self.offset, str(self.startpoints)),
+                         1)
 
 
     def __str__(self):
-        return _str(self, bl=self.params.boxlength)
+        return _str(self, bl=self.boxlength)
 
 
     def forward1(self, data):
@@ -116,7 +128,7 @@ class BoxcarMapper(Mapper):
             raise ValueError("Data shape %s does not match sample shape %s."
                              % (data.shape[0], self._outshape[2]))
 
-        return np.vstack([data[np.newaxis]] * self.params.boxlength)
+        return np.vstack([data[np.newaxis]] * self.boxlength)
 
 
     def _forward_data(self, data):
@@ -156,10 +168,10 @@ class BoxcarMapper(Mapper):
             # this implementation can actually deal with 1D-arrays
             mds.sa[k] = self._forward_data(dataset.sa[k].value)
         # create the box offset attribute if space name is given
-        if self.params.space is not None:
-            mds.fa[self.params.space + '_offsetidx'] = np.arange(self.params.boxlength,
+        if self.get_space():
+            mds.fa[self.get_space() + '_offsetidx'] = np.arange(self.boxlength,
                                                                 dtype='int')
-            mds.sa[self.params.space + '_onsetidx'] = self.params.startpoints.copy()
+            mds.sa[self.get_space() + '_onsetidx'] = self.startpoints.copy()
         return mds
 
 
@@ -178,18 +190,18 @@ class BoxcarMapper(Mapper):
         if len(data.shape) < 2:
             # this is not something that this mapper created -- let's broadcast
             # its elements and hope that it would work
-            return np.repeat(data, self.params.boxlength)
+            return np.repeat(data, self.boxlength)
 
         # stack them all together -- this will cause overlapping boxcars to
         # result in multiple identical samples
-        if not data.shape[1] == self.params.boxlength:
+        if not data.shape[1] == self.boxlength:
             # stacking doesn't make sense, since we got something strange
             raise ValueError("%s cannot reverse-map, since the number of "
                              "elements along the second axis (%i) does not "
                              "match the boxcar-length (%i)."
                              % (self.__class__.__name__,
                                 data.shape[1],
-                                self.params.boxlength))
+                                self.boxlength))
 
         return np.concatenate(data)
 
@@ -204,7 +216,7 @@ class BoxcarMapper(Mapper):
         mds.fa.set_length_check(mds.nfeatures)
         # map old feature attributes -- which simply is taken the first one
         # and kill the inspace attribute, since it 
-        inspace = self.params.space
+        inspace = self.get_space()
         for k in dataset.fa:
             if inspace is None or k != (inspace + '_offsetidx'):
                 mds.fa[k] = dataset.fa[k].value[0]

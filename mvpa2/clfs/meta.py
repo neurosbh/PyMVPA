@@ -1175,7 +1175,7 @@ class MulticlassClassifier(CombinedClassifier):
             pairs = zip(np.array([np.squeeze(clf.neglabels) for clf in self.clfs]).tolist(),
                         np.array([np.squeeze(clf.poslabels) for clf in self.clfs]).tolist())
             ca.raw_predictions_ds = raw_predictions_ds = \
-                Dataset(np.array(raw_predictions).T, fa={self.space: asobjarray(pairs)})
+                Dataset(np.array(raw_predictions).T, fa={self.params.space: asobjarray(pairs)})
         if self.combiner is None:
             return raw_predictions_ds
         else:
