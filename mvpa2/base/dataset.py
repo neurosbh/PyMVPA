@@ -366,10 +366,10 @@ class AttrDataset(object):
         if deep:
             samples = copy.deepcopy(self.samples, memo)
         else:
-            samples = self.samples.view()
-
+            samples = self.samples.view()    
         if __debug__:
             debug('DS_', "Create new dataset instance for copy")
+            
         # call the generic init
         out = self.__class__(samples,
                              sa=self.sa.copy(a=sa, deep=deep, memo=memo),
