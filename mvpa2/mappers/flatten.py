@@ -56,8 +56,6 @@ class FlattenMapper(Mapper):
           If None, all axes will be flattened.
         """
         # by default auto train
-        #__dummy_var = locals()
-        #print __dummy_var
         Mapper.__init__(self, **kwargs)
         self.params.auto_train = True
         self._kwargs = kwargs    

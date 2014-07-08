@@ -122,6 +122,8 @@ class Node(ClassWithCollections):
                     l.append(mvpa2_object.params['origshape'].value)
                 elif i=='slicearg':
                     l.append(self.__dict__['_slicearg'])
+                elif i=='nodes':
+                    l.append(self.__dict__['_nodes'])
                 else:
                     if argspec[0][k+1] in self.__dict__:
                         l.append(self.__dict__[argspec[0][k+1]])
@@ -131,9 +133,11 @@ class Node(ClassWithCollections):
         for key in self.params.which_set():        
             para_dict[key]=self.params[key].value
     
-        ### useful, potentially
+        ### fixing stuff
         fix_dict = {}
-          
+        if '_outshape' in self.__dict__:
+            fix_dict.update({'_outshape':self.__dict__['_outshape']})
+        
         return (self.__class__, para_tuple(self), (para_dict, fix_dict))
 
 

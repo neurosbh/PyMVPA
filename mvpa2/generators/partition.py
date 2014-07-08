@@ -83,7 +83,7 @@ class Partitioner(Node):
             + _repr_attrs(self, ['count'])
             + _repr_attrs(self, ['selection_strategy'], default='equidistant')
             + _repr_attrs(self, ['attr'], default='chunks')
-            + _repr_attrs(self, ['space'], default='partitions')
+            #+ _repr_attrs(self, ['space'], default='partitions')
             )
 
 
