@@ -141,7 +141,8 @@ class Node(ClassWithCollections):
             fix_dict.update({'_isset':self.__dict__['_isset']})
         if '_set_retrainable' in self.__dict__:
             fix_dict.update({'_set_retrainable':self.__dict__['_set_retrainable']})            
-
+        if '_Learner__is_trained' in self.__dict__:
+            fix_dict.update({'_Learner__is_trained':self.__dict__['_Learner__is_trained']}) 
         
         return (self.__class__, para_tuple(self), (para_dict, fix_dict))
 
