@@ -271,6 +271,14 @@ class Learner(Node):
     is_trained = property(fget=lambda x:x.__is_trained, fset=_set_trained,
                           doc="Whether the Learner is currently trained.")
 
+#    auto_train = property(fget=lambda x:x.__auto_train,
+#                          doc="Whether the Learner performs automatic training"
+#                              "when called untrained.")
+#    force_train = property(fget=lambda x:x.__force_train,
+#                          doc="Whether the Learner enforces training upon every"
+#                              "called.")
+
+
 
 
 class CompoundLearner(Learner, CompoundNode):

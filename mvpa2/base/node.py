@@ -137,6 +137,11 @@ class Node(ClassWithCollections):
         fix_dict = {}
         if '_outshape' in self.__dict__:
             fix_dict.update({'_outshape':self.__dict__['_outshape']})
+        if '_isset' in self.__dict__:
+            fix_dict.update({'_isset':self.__dict__['_isset']})
+        if '_set_retrainable' in self.__dict__:
+            fix_dict.update({'_set_retrainable':self.__dict__['_set_retrainable']})            
+
         
         return (self.__class__, para_tuple(self), (para_dict, fix_dict))
 
