@@ -322,7 +322,12 @@ class Node(ClassWithCollections):
     def get_space(self):
         """For backwards compapility."""
         return self.params.space
+        
+    def set_space(self, name):
+        """Set the processing space name of this node."""
+        self.params.space = name
 
+        
 
     def __str__(self):
         return _str(self)
@@ -332,7 +337,6 @@ class Node(ClassWithCollections):
         return super(Node, self).__repr__(
             prefixes=prefixes
             + _repr_attrs(self, ['pass_attr', 'postproc']))
-
 
     pass_attr = property(lambda self: self.__pass_attr,
                          doc="Which attributes of the dataset or self.ca "
