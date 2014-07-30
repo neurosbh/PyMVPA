@@ -124,6 +124,12 @@ class Node(ClassWithCollections):
                     l.append(self.__dict__['_slicearg'])
                 elif i=='nodes':
                     l.append(self.__dict__['_nodes'])
+                elif i=='is_set':
+                    l.append(self.__dict__['is_set'])
+                elif i=='measure':
+                    l.append(self.__dict__['_TransferMeasure__measure'])
+                elif i=='splitter':
+                    l.append(self.__dict__['_TransferMeasure__splitter'])
                 else:
                     if argspec[0][k+1] in self.__dict__:
                         l.append(self.__dict__[argspec[0][k+1]])
@@ -144,8 +150,8 @@ class Node(ClassWithCollections):
         if '_set_retrainable' in self.__dict__:
             fix_dict.update({'_set_retrainable':self.__dict__['_set_retrainable']})            
         if '_Learner__is_trained' in self.__dict__:
-            fix_dict.update({'_Learner__is_trained':self.__dict__['_Learner__is_trained']}) 
-        
+            fix_dict.update({'_Learner__is_trained':self.__dict__['_Learner__is_trained']})
+            
         return (self.__class__, para_tuple(self), (para_dict, fix_dict))
 
 

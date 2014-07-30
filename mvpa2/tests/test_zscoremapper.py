@@ -62,7 +62,7 @@ def test_mapper_vs_zscore():
 def test_zcore_repr():
     # Just basic test if everything is sane... no proper comparison
     for m in (ZScoreMapper(chunks_attr=None),
-              ZScoreMapper(params=(3, 1)),
+              ZScoreMapper(zsm_params=(3, 1)),
               ZScoreMapper()):
         mr = eval(repr(m))
         ok_(isinstance(mr, ZScoreMapper))
@@ -135,7 +135,7 @@ def test_zscore():
     assert_array_equal(pristine, ds)
 
     # if we tell it a different mean it should obey the order
-    zm = ZScoreMapper(params=(3,1))
+    zm = ZScoreMapper(zsm_params=(3,1))
     zm.train(ds)
     assert_array_almost_equal(zm.forward(ds), np.transpose([check]) - 1 )
     assert_array_equal(pristine, ds)
@@ -149,7 +149,7 @@ def test_zscore():
     zm.train(ds)                        # train
     assert_array_almost_equal(zm.forward(ds), np.transpose([check + check]))
     # we should be able to do that same manually
-    zm = ZScoreMapper(params={0: (2,1), 1: (12,1)})
+    zm = ZScoreMapper(zsm_params={0: (2,1), 1: (12,1)})
     zm.train(ds)                        # train
     assert_array_almost_equal(zm.forward(ds), np.transpose([check + check]))
 
@@ -176,7 +176,7 @@ def test_zscore():
     std0 = np.std(ds[:, 0])             # std deviation of first one
     stds = [std0, 10, .1, 1]
 
-    zm = ZScoreMapper(params=(means, stds),
+    zm = ZScoreMapper(zsm_params=(means, stds),
                       auto_train=True)
     dsz = zm(ds)
 

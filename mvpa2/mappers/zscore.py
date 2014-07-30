@@ -48,12 +48,12 @@ class ZScoreMapper(Mapper):
 
     Reverse-mapping is currently not implemented.
     """
-    def __init__(self, params=None, param_est=None, chunks_attr='chunks',
+    def __init__(self, zsm_params=None, param_est=None, chunks_attr='chunks',
                  dtype='float64', **kwargs):
         """
         Parameters
         ----------
-        params : None or tuple(mean, std) or dict
+        zsm_params : None or tuple(mean, std) or dict
           Fixed Z-Scoring parameters (mean, standard deviation). If provided,
           no parameters are estimated from the data. It is possible to specify
           individual parameters for each chunk by passing a dictionary with the
@@ -77,7 +77,7 @@ class ZScoreMapper(Mapper):
         Mapper.__init__(self, **kwargs)
 
         self.__chunks_attr = chunks_attr
-        self.__params = params
+        self.__params = zsm_params
         self.__param_est = param_est
         self.__params_dict = None
         self.__dtype = dtype
